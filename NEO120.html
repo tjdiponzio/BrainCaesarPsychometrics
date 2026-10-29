@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personality Assessment NEO-120</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 850px;
+            background: transparent;
+        }
+
+        /* --- Question View Styles --- */
+        #question-view {
+            display: block;
+        }
+
+        .progress-lbl {
+            font-size: 14px;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        .question-lbl {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        .options-container {
+            margin-bottom: 40px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f4f8;
+        }
+
+        .option-label input {
+            margin-right: 15px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-back { background-color: #6c757d; }
+        .btn-next { background-color: #007bff; }
+        .btn-submit { background-color: #28a745; }
+        .hidden { display: none !important; }
+
+        /* --- Results View Styles --- */
+        #results-view {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .results-header {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .total-box {
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .domain-card {
+            background-color: #ffffff;
+            border: 1px solid #eaeded;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .domain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .domain-header h3 {
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        .domain-header span {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #eaeded;
+            margin-bottom: 15px;
+        }
+
+        .facets-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .facet-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .facet-name { font-weight: bold; color: #555; width: 140px; }
+        .facet-score { color: #2980b9; margin-right: 10px; width: 55px; }
+        progress { width: 100px; height: 12px; }
+
+        /* Audit Log Styles */
+        .audit-box {
+            background-color: #ffffff;
+            border: 1px solid #eaeded;
+            border-radius: 5px;
+            padding: 10px 0;
+        }
+
+        .audit-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .audit-row:last-child { border-bottom: none; }
+        .audit-text { flex: 1; font-size: 13px; color: #333; line-height: 1.4; padding-right: 20px; }
+        .audit-subtext { font-size: 11px; color: #777; margin-top: 4px; }
+        .audit-score { font-size: 13px; font-weight: bold; color: #2980b9; white-space: nowrap; }
+
+        /* Citation Footer Style */
+        .citation-footer {
+            background-color: #ffffff;
+            border: 1px solid #eaeded;
+            border-radius: 5px;
+            padding: 15px 20px;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 650px) {
+            .facets-grid { grid-template-columns: 1fr; }
+            .audit-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    
+    <!-- Question View -->
+    <div id="question-view">
+        <div id="progress-lbl" class="progress-lbl">Question 1 of 120</div>
+        <div id="question-lbl" class="question-lbl">Loading...</div>
+        
+        <div id="options-container" class="options-container">
+            <!-- Radio buttons injected via JS -->
+        </div>
+
+        <div class="nav-controls">
+            <button id="btn-back" class="btn btn-back hidden" onclick="prevQuestion()">◀ Back</button>
+            <div style="flex:1"></div>
+            <button id="btn-next" class="btn btn-next" onclick="nextQuestion()">Next ▶</button>
+            <button id="btn-submit" class="btn btn-submit hidden" onclick="submitSurvey()">Submit Assessment ✔</button>
+        </div>
+    </div>
+
+    <!-- Results View -->
+    <div id="results-view">
+        <div class="results-header">ASSESSMENT COMPLETE</div>
+        
+        <div class="total-box" id="grand-total-box">
+            OVERALL GRAND SCORE: 0
+        </div>
+
+        <div class="section-title">Traits and Granular Subscales Dashboard:</div>
+        <div id="dashboard-container">
+            <!-- Domain Cards injected here -->
+        </div>
+
+        <div class="section-title">Detailed Question Audit Trail:</div>
+        <div class="audit-box" id="audit-container">
+            <!-- Audit rows injected here -->
+        </div>
+
+        <div class="section-title">Reference / Citation:</div>
+        <div class="citation-footer">
+            Johnson, J. A. (2014). International Personality Item Pool-NEO-120 (IPIP-NEO-120) [Database record]. <em>APA PsycTests</em>. https://doi.org/10.1037/t34102-000
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const domainNames = {
+        "O": "Openness",
+        "C": "Conscientiousness",
+        "E": "Extraversion",
+        "A": "Agreeableness",
+        "N": "Neuroticism"
+    };
+
+    const facetNames = {
+        "Imagination": "Imagination", "Artistic Interests": "Artistic Interests", "Emotionality": "Emotionality", "Adventurousness": "Adventurousness", "Intellect": "Intellect", "Liberalism": "Liberalism",
+        "Self-Efficacy": "Self-Efficacy", "Orderliness": "Orderliness", "Dutifulness": "Dutifulness", "Achievement Striving": "Achievement Striving", "Self-Discipline": "Self-Discipline", "Cautiousness": "Cautiousness",
+        "Friendliness": "Friendliness", "Gregariousness": "Gregariousness", "Assertiveness": "Assertiveness", "Activity Level": "Activity Level", "Excitement Seeking": "Excitement Seeking", "Cheerfulness": "Cheerfulness",
+        "Trust": "Trust", "Morality": "Morality", "Altruism": "Altruism", "Cooperation": "Cooperation", "Modesty": "Modesty", "Sympathy": "Sympathy",
+        "Anxiety": "Anxiety", "Anger": "Anger", "Depression": "Depression", "Self-Consciousness": "Self-Consciousness", "Immoderation": "Immoderation", "Vulnerability": "Vulnerability"
+    };
+
+    const subscales = {
+        "O": {
+            "Imagination": [["I have a vivid imagination.", false], ["I enjoy wild flights of fantasy.", false], ["I love to daydream.", false], ["I like to get lost in thought.", false]],
+            "Artistic Interests": [["I believe in the importance of art.", false], ["I see beauty in things that others might not notice.", false], ["I do not like poetry.", true], ["I do not enjoy going to art museums.", true]],
+            "Emotionality": [["I experience emotions intensely.", false], ["I feel other people's emotions.", false], ["I rarely notice my emotional reactions.", true], ["I don't understand people who get emotional.", true]],
+            "Adventurousness": [["I prefer variety to routine", false], ["I prefer to stick with things that I know.", true], ["I dislike change.", true], ["I am attached to conventional ways.", true]],
+            "Intellect": [["I love to read challenging material.", false], ["I avoid philosophical discussions.", true], ["I have difficulty understanding abstract ideas.", true], ["I am not interested in theoretical discussions.", true]],
+            "Liberalism": [["I tend to vote for liberal political candidates.", false], ["I believe that there is no absolute right or wrong.", false], ["I tend to vote for conservative political candidates.", true], ["I believe that we should be tough on crime.", true]]
+        },
+        "C": {
+            "Self-Efficacy": [["I complete tasks successfully.", false], ["I excel in what I do.", false], ["I handle tasks smoothly.", false], ["I know how to get things done.", false]],
+            "Orderliness": [["I like to tidy up.", false], ["I often forget to put things back in their place.", true], ["I leave a mess in my room.", true], ["I leave my belongings around.", true]],
+            "Dutifulness": [["I keep my promises.", false], ["I tell the truth.", false], ["I break rules.", true], ["I break my promises.", true]],
+            "Achievement Striving": [["I work hard.", false], ["I do more than what's expected of me.", false], ["I do just enough work to get by.", true], ["I put little time and effort into my work.", true]],
+            "Self-Discipline": [["I am always prepared.", false], ["I carry out my plans.", false], ["I do not waste my time.", false], ["I have difficulty starting tasks.", true]],
+            "Cautiousness": [["I jump into things without thinking.", true], ["I make rash decisions.", true], ["I rush into things.", true], ["I act without thinking.", true]]
+        },
+        "E": {
+            "Friendliness": [["I make friends easily.", false], ["I feel uncomfortable around people.", true], ["I tend to avoid others.", true], ["I keep others at a difference.", true]],
+            "Gregariousness": [["I love large parties.", false], ["I talk to a lot of different people at parties.", false], ["I prefer to be alone.", true], ["I avoid crowds.", true]],
+            "Assertiveness": [["I take charge.", false], ["I try to lead others.", false], ["I take control of things.", false], ["I wait for others to lead the way.", true]],
+            "Activity Level": [["I am always busy.", false], ["I am always on the go.", false], ["I do a lot in my spare time.", false], ["I like to take it easy.", true]],
+            "Excitement Seeking": [["I love excitement.", false], ["I seek adventure.", false], ["I enjoy being reckless.", false], ["I act wild and crazy.", false]],
+            "Cheerfulness": [["I radiate cheer.", false], ["I have a lot of fun.", false], ["I love life.", false], ["I'm optimistic and look on the bright side.", false]]
+        },
+        "A": {
+            "Trust": [["I trust others.", false], ["I believe others have good intentions.", false], ["I trust what people say.", false], ["I distrust people.", true]],
+            "Morality": [["I use others for my own ends.", true], ["I cheat to get ahead.", true], ["I take advantage of others.", true], ["I obstruct others' plans.", true]],
+            "Altruism": [["I love to help others.", false], ["I am concerned with others.", false], ["I am indifferent to the feelings of others.", true], ["I take no time for others.", true]],
+            "Cooperation": [["I love a food fight.", true], ["I yell at people.", true], ["I insult people.", true], ["I get back at others.", true]],
+            "Modesty": [["I believe I am better than others.", true], ["I think highly of myself.", true], ["I have a high opinion of myself.", true], ["I boast about my virtues.", true]],
+            "Sympathy": [["I sympathize with the homeless.", false], ["I feel sympathy for those who are worse off than myself.", false], ["I am not interested in other's people's problems.", true], ["I try not to think about the needy.", true]]
+        },
+        "N": {
+            "Anxiety": [["I worry about things.", false], ["I fear the worst.", false], ["I am afraid of many things.", false], ["I get stressed easily.", false]],
+            "Anger": [["I get angry easily.", false], ["I get irritated easily.", false], ["I often lose my temper.", false], ["I am not easily annoyed.", true]],
+            "Depression": [["I often feel blue.", false], ["I dislike myself.", false], ["I am often down in the dumps.", false], ["I feel comfortable with myself.", true]],
+            "Self-Consciousness": [["I find it difficult to approach others.", false], ["I am afraid to draw attention to myself.", false], ["I only feel comfortable with my friends.", false], ["I am not bothered by difficult social situations.", true]],
+            "Immoderation": [["I go on binges.", false], ["I rarely overindulge.", true], ["I easily resist temptations.", true], ["I am able to control my cravings.", true]],
+            "Vulnerability": [["I panic easily.", false], ["I become overwhelmed by events.", false], ["I feel that I am unable to deal with things.", false], ["I remain calm under pressure.", true]]
+        }
+    };
+
+    const likertOptions = [
+        ["Strongly Disagree", 1],
+        ["Disagree", 2],
+        ["Neither Agree nor Disagree", 3],
+        ["Agree", 4],
+        ["Strongly Agree", 5]
+    ];
+
+    let questionsPool = [];
+    let currentIndex = 0;
+    let userAnswers = {};
+
+    function initApp() {
+        for (const [domainCode, facets] of Object.entries(subscales)) {
+            for (const [facetCode, qList] of Object.entries(facets)) {
+                for (const [qText, isReverse] of qList) {
+                    questionsPool.push({
+                        domain: domainCode,
+                        facet: facetCode,
+                        text: qText,
+                        reverse: isReverse
+                    });
+                }
+            }
+        }
+        questionsPool.sort(() => Math.random() - 0.5);
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const qData = questionsPool[currentIndex];
+        document.getElementById('progress-lbl').innerText = `Question ${currentIndex + 1} of ${questionsPool.length}`;
+        document.getElementById('question-lbl').innerText = qData.text;
+
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        
+        const currentChoice = userAnswers[currentIndex] || 0;
+
+        likertOptions.forEach(([optText, points]) => {
+            const checked = currentChoice === points ? 'checked' : '';
+            optionsContainer.innerHTML += `
+                <label class="option-label">
+                    <input type="radio" name="current_q" value="${points}" ${checked}>
+                    ${optText}
+                </label>
+            `;
+        });
+
+        document.getElementById('btn-back').classList.toggle('hidden', currentIndex === 0);
+        
+        if (currentIndex === questionsPool.length - 1) {
+            document.getElementById('btn-next').classList.add('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+        } else {
+            document.getElementById('btn-next').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.add('hidden');
+        }
+    }
+
+    function getSelectedValue() {
+        const selected = document.querySelector(`input[name="current_q"]:checked`);
+        return selected ? parseInt(selected.value) : 0;
+    }
+
+    function nextQuestion() {
+        const val = getSelectedValue();
+        if (val === 0) {
+            alert("Please select an answer before continuing.");
+            return;
+        }
+        userAnswers[currentIndex] = val;
+        currentIndex++;
+        showQuestion();
+    }
+
+    function prevQuestion() {
+        const val = getSelectedValue();
+        if (val !== 0) {
+            userAnswers[currentIndex] = val;
+        }
+        currentIndex--;
+        showQuestion();
+    }
+
+    function submitSurvey() {
+        const val = getSelectedValue();
+        if (val === 0) {
+            alert("Please select an answer before submitting.");
+            return;
+        }
+        userAnswers[currentIndex] = val;
+        calculateAndShowResults();
+    }
+
+    function calculateAndShowResults() {
+        let domainScores = { "O": 0, "C": 0, "E": 0, "A": 0, "N": 0 };
+        let facetScores = {};
+        
+        Object.keys(facetNames).forEach(f => facetScores[f] = 0);
+        let grandTotal = 0;
+
+        questionsPool.forEach((qData, idx) => {
+            const rawVal = userAnswers[idx] || 0;
+            if (rawVal === 0) return;
+
+            const actualScore = qData.reverse ? (6 - rawVal) : rawVal;
+            facetScores[qData.facet] += actualScore;
+            domainScores[qData.domain] += actualScore;
+            grandTotal += actualScore;
+        });
+
+        document.getElementById('question-view').style.display = 'none';
+        document.getElementById('results-view').style.display = 'flex';
+
+        document.getElementById('grand-total-box').innerText = `OVERALL GRAND SCORE: ${grandTotal}`;
+
+        const dashboard = document.getElementById('dashboard-container');
+        dashboard.innerHTML = '';
+
+        for (const [code, dName] of Object.entries(domainNames)) {
+            let facetsHtml = '';
+            
+            Object.keys(subscales[code]).forEach(fCode => {
+                const fName = facetNames[fCode];
+                const fScore = facetScores[fCode];
+                
+                facetsHtml += `
+                    <div class="facet-item">
+                        <span class="facet-name">• ${fName}:</span>
+                        <span class="facet-score">${fScore}/20 pts</span>
+                        <progress value="${fScore}" max="20"></progress>
+                    </div>
+                `;
+            });
+
+            dashboard.innerHTML += `
+                <div class="domain-card">
+                    <div class="domain-header">
+                        <h3>${dName.toUpperCase()}</h3>
+                        <span>Total Domain Score: ${domainScores[code]} pts</span>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="facets-grid">
+                        ${facetsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        const auditContainer = document.getElementById('audit-container');
+        auditContainer.innerHTML = '';
+
+        questionsPool.forEach((qData, idx) => {
+            const rawVal = userAnswers[idx] || 0;
+            const actualScore = qData.reverse ? (6 - rawVal) : rawVal;
+            const reverseText = qData.reverse ? " (Reverse Scored)" : "";
+            
+            auditContainer.innerHTML += `
+                <div class="audit-row">
+                    <div class="audit-text">
+                        Q${idx + 1}. ${qData.text}
+                        <div class="audit-subtext">
+                            [${domainNames[qData.domain]} ➔ ${facetNames[qData.facet]}] ${reverseText}
+                        </div>
+                    </div>
+                    <div class="audit-score">
+                        Chosen Raw: ${rawVal} ➔ Points: ${actualScore}
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    window.onload = initApp;
+</script>
+
+</body>
+</html>
