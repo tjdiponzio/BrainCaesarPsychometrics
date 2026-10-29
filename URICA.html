@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Assessment - URICA</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #e5e5e5;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        /* Left Panel - Survey */
+        .survey-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .survey-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .options-wrapper {
+            display: flex;
+            gap: 15px;
+            padding-left: 15px;
+            flex-wrap: wrap;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .option-label input {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        /* Right Panel - Sidebar */
+        .sidebar {
+            width: 320px;
+            background-color: #f8f9fa;
+            padding: 30px 20px;
+            border-left: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            padding-right: 5px;
+        }
+
+        .sidebar h2 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .score-block {
+            text-align: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .score-block-title {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 2px;
+        }
+
+        .score-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .divider {
+            width: 100%;
+            height: 2px;
+            background-color: #ccc;
+            margin: 15px 0;
+        }
+
+        /* Citation Section */
+        .citation-box {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            background: #fafafa;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 15px;
+            line-height: 1.3;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Left Panel: Survey Questions -->
+    <div class="survey-panel">
+        <div class="survey-header">
+            <h1>Stages of Change URICA Assessment</h1>
+        </div>
+        <div id="questions-container">
+            <!-- Dynamically populated questions -->
+        </div>
+    </div>
+
+    <!-- Right Panel: Score & Interpretation Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <h2>PROGRESSION MONITOR</h2>
+
+            <div class="score-block">
+                <div class="score-block-title">Precontemplation</div>
+                <div id="score-Pre" class="score-display">0.0</div>
+            </div>
+
+            <div class="score-block">
+                <div class="score-block-title">Contemplation</div>
+                <div id="score-Con" class="score-display">0.0</div>
+            </div>
+
+            <div class="score-block">
+                <div class="score-block-title">Action</div>
+                <div id="score-Act" class="score-display">0.0</div>
+            </div>
+
+            <div class="score-block">
+                <div class="score-block-title">Maintenance</div>
+                <div id="score-Main" class="score-display">0.0</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Citation Space -->
+            <div class="citation-box">
+                <strong>Citation:</strong> Tambling, R., & Ketring, S. A. (2014). University of Rhode Island Change Assessment Scale--Revised (R-URICA, URICA) [Database record]. APA PsycTests. https://doi.org/10.1037/t47267-000
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitSurvey()">score</button>
+    </div>
+</div>
+
+<script>
+    const subscales = {
+        "Pre": [
+            "As far as I'm concerned I don't have any problems that need changing.",
+            "Trying to change is pretty much a waste of time for me because the problem doesn't have to do with me.",
+            "I guess I have faults, but there's nothing that I really need to change.",
+            "I may be part of the problem, but I don't really think I am.",
+            "All this talk about psychology is boring. Why can't people just forget about their problems?",
+            "I have worries but so does the next person. Why spend time thinking about them?"
+        ],
+        "Con": [
+            "I think I might be ready for some self-improvement.",
+            "I've been thinking that I might want to change something about myself.",
+            "I'm hoping this place will help me to better understand myself.",
+            "I have a problem and I really think I should work on it.",
+            "I wish I had more ideas on how to solve my problem.",
+            "Maybe this place will be able to help me.",
+            "I hope that someone here will have some good advice for me."
+        ],
+        "Act": [
+            "I am doing something about the problems that had been bothering me.",
+            "I am finally doing some work on my problems.",
+            "At times my problem is difficult, but I'm working on it.",
+            "I am really working hard to change.",
+            "Even though I'm not always successful in changing, I am at least working on my problem.",
+            "Anyone can talk about changing; I'm actually doing something about it.",
+            "I am actively working on my problem."
+        ],
+        "Main": [
+            "It worries me that I might slip back on a problem I have already changed, so I am here to seek help.",
+            "I'm not following through with what I had already changed as well as I had hoped, and I'm here to prevent a relapse of the problem.",
+            "I thought once I had resolved the problem I would be free of it, but sometimes I still find myself struggling with it.",
+            "I may need a boost right now to help me maintain the changes I've already made.",
+            "I'm here to prevent myself from having a relapse of my problem.",
+            "It is frustrating, but I feel I might be having a recurrence of a problem I thought I had resolved.",
+            "After all I had done to try and change my problem, every now and then it comes back to haunt me."
+        ]
+    };
+
+    const likertOptions = [
+        ["Strongly Disagree", 1], ["Disagree", 2], ["Undecided", 3], ["Agree", 4], ["Strongly Agree", 5]
+    ];
+
+    let randomizedQuestions = [];
+
+    function renderSurvey() {
+        const container = document.getElementById("questions-container");
+        
+        // Flatten and randomize questions
+        randomizedQuestions = [];
+        for (const [code, qList] of Object.entries(subscales)) {
+            qList.forEach(qText => {
+                randomizedQuestions.push({ text: qText, code: code });
+            });
+        }
+        
+        // Shuffle array securely
+        for (let i = randomizedQuestions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [randomizedQuestions[i], randomizedQuestions[j]] = [randomizedQuestions[j], randomizedQuestions[i]];
+        }
+
+        let html = "";
+        randomizedQuestions.forEach((q, index) => {
+            html += `
+                <div class="question-container">
+                    <div class="question-title">${index + 1}. ${q.text}</div>
+                    <div class="options-wrapper">
+            `;
+            likertOptions.forEach(opt => {
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="q_${index}" data-code="${q.code}" value="${opt[1]}" onchange="updateAllScores()">
+                        ${opt[0]}
+                    </label>
+                `;
+            });
+            html += `</div></div>`;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function updateAllScores() {
+        const categories = ["Pre", "Con", "Act", "Main"];
+        
+        categories.forEach(code => {
+            const radios = document.querySelectorAll(`input[data-code="${code}"]:checked`);
+            let rawSum = 0;
+            radios.forEach(r => {
+                rawSum += parseInt(r.value);
+            });
+
+            const numQuestions = subscales[code].length;
+            const subAverage = rawSum > 0 ? (rawSum / numQuestions).toFixed(2) : "0.0";
+            
+            const displayEl = document.getElementById(`score-${code}`);
+            displayEl.innerText = subAverage;
+
+            const avgNum = parseFloat(subAverage);
+            let color = "#000000";
+            if (avgNum >= 4.0) {
+                color = "#00aa22";
+            } else if (avgNum >= 2.5) {
+                color = "#cc8800";
+            }
+            displayEl.style.color = color;
+        });
+    }
+
+    function submitSurvey() {
+        const getScore = (code) => parseFloat(document.getElementById(`score-${code}`).innerText);
+        const pre = getScore("Pre");
+        const con = getScore("Con");
+        const act = getScore("Act");
+        const main = getScore("Main");
+
+        const readinessScore = parseFloat(((con + act + main) - pre).toFixed(2));
+
+        let assignedStage = "Maintenance";
+        if (readinessScore <= 8) {
+            assignedStage = "Pre-contemplation";
+        } else if (readinessScore <= 11) {
+            assignedStage = "Contemplation";
+        } else if (readinessScore <= 14) {
+            assignedStage = "Action";
+        }
+
+        alert(`Clinical Interpretation\nReadiness Score: ${readinessScore}\nAssigned Stage: ${assignedStage}`);
+    }
+
+    window.onload = renderSurvey;
+</script>
+
+</body>
+</html>
