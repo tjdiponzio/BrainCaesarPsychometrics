@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Columbia Suicide Risk Assessment</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #e5e5e5;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        /* Left Panel - Survey */
+        .survey-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .survey-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 4px 0 4px 15px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* Right Panel - Sidebar */
+        .sidebar {
+            width: 340px;
+            background-color: #f0f0f0;
+            padding: 30px 20px;
+            border-left: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar h2 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .interpretation-box {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            background: #fff;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            width: 100%;
+            margin-bottom: 15px;
+            white-space: pre-line;
+        }
+
+        .divider {
+            width: 100%;
+            height: 2px;
+            background-color: #ccc;
+            margin: 15px 0;
+        }
+
+        .total-score-title {
+            font-size: 15px;
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+
+        .risk-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+
+        .score-display {
+            font-size: 56px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        /* Citation Section */
+        .citation-box {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            background: #fafafa;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #333;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .submit-btn:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Left Panel: Survey Questions -->
+    <div class="survey-panel">
+        <div class="survey-header">
+            <h1>Columbia Suicide Risk Assessment</h1>
+        </div>
+        <div id="questions-container">
+            <!-- Dynamically populated questions -->
+        </div>
+    </div>
+
+    <!-- Right Panel: Score & Interpretation Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <h2>Score Interpretation</h2>
+            <div class="interpretation-box">• Yes to 1 or 2: Mild Risk
+• Yes to 3 or 6: Moderate Risk
+• Yes to 4, 5, or 7: HIGH RISK
+
+Safety Plan:
+- Ask Warning Signs
+- Coping Skills
+- People to call
+- Environmental safety
+- Reasons for living
+- 988 Crisis Support</div>
+
+            <div class="divider"></div>
+
+            <div class="total-score-title">RISK LEVEL</div>
+            <div id="risk-label" class="risk-label">LOW</div>
+            <div id="score-display" class="score-display"></div>
+
+            <!-- Citation Space underneath the score -->
+            <div class="citation-box">
+                <strong>Citation:</strong> Posner, K. (2007). Columbia-Suicide Severity Rating Scale (C-SSRS) [Database record]. APA PsycTests. https://doi.org/10.1037/t52667-000
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitSurvey()">Submit Final Survey</button>
+    </div>
+</div>
+
+<script>
+    const questionsData = [
+        {
+            text: "Have they ever wished they were dead<br>or wished to sleep and not wake up?",
+            options: [["No", 0], ["Yes", 1]]
+        },
+        {
+            text: "Have they had any thoughts of killing themself?",
+            options: [["No", 0], ["Yes", 1]]
+        },
+        {
+            text: "Have they been thinking about how they would do this?",
+            options: [["No", 0], ["Yes", 1]]
+        },
+        {
+            text: "Have they had these thoughts with intention on acting on them?",
+            options: [["No", 0], ["Yes", 1]]
+        },
+        {
+            text: "Have they worked out or planned the details?<br>Do they plan to carry out the plan?",
+            options: [["No", 0], ["Yes", 1]]
+        },
+        {
+            text: "Have they ever prepared or started to do anything to end their life?",
+            options: [["No", 0], ["Yes", 1]]
+        },
+        {
+            text: "Was it within the past three months?",
+            options: [["No", 0], ["Yes", 1]]
+        }
+    ];
+
+    function renderSurvey() {
+        const container = document.getElementById("questions-container");
+        let html = "";
+
+        questionsData.forEach((q, index) => {
+            html += `
+                <div class="question-container">
+                    <div class="question-title">${index + 1}. ${q.text}</div>
+            `;
+            q.options.forEach(opt => {
+                const checked = opt[1] === 0 ? "checked" : "";
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="q${index}" value="${opt[1]}" ${checked} onchange="updateSeverityDisplay()">
+                        ${opt[0]}
+                    </label>
+                `;
+            });
+            html += `</div>`;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function updateSeverityDisplay() {
+        let total = 0;
+        let ans = [];
+
+        questionsData.forEach((_, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const val = selected ? parseInt(selected.value) : 0;
+            total += val;
+            ans.push(val);
+        });
+
+        document.getElementById("score-display")
+
+        let color = "#2e7d32";
+        let level = "LOW";
+
+
+        const highRisk = ans[3] === 1 || ans[4] === 1 || ans[6] === 1;
+        const moderateRisk = ans[2] === 1 || ans[5] ===1;
+        const mildRisk = ans[0] === 1 || ans[1] === 1;
+
+        if (highRisk) {
+            color = "#d32f2f";
+            level = "HIGH RISK";
+        } else if (moderateRisk) {
+            color = "#ef6c00";
+            level = "MODERATE";
+        } else if (mildRisk) {
+            color = "#f9a825";
+            level = "MILD RISK";
+        }
+
+        const scoreDisplay = document.getElementById("score-display");
+        const riskLabel = document.getElementById("risk-label");
+
+        scoreDisplay.style.color = color;
+        riskLabel.style.color = color;
+        riskLabel.innerText = level;
+    }
+
+    function submitSurvey() {
+        const finalScore = document.getElementById("score-display").innerText;
+        const risk = document.getElementById("risk-label").innerText;
+        alert(`Assessment Complete!\nScore: ${finalScore}\nRisk Level: ${risk}`);
+    }
+
+    // Initialize on load
+    window.onload = renderSurvey;
+</script>
+
+</body>
+</html>
