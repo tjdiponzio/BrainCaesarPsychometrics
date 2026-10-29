@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Need for Cognition Scale</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #e5e5e5;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        /* Left Panel - Survey */
+        .survey-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .survey-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .survey-header p {
+            font-size: 13px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-left: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .option-italic {
+            font-style: italic;
+            color: gray;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+
+        /* Right Panel - Sidebar */
+        .sidebar {
+            width: 340px;
+            background-color: #f0f0f0;
+            padding: 30px 20px;
+            border-left: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            padding-right: 5px;
+        }
+
+        .sidebar h2 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .interpretation-box {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            background: #fff;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            width: 100%;
+            margin-bottom: 15px;
+            white-space: pre-line;
+        }
+
+        .divider {
+            width: 100%;
+            height: 2px;
+            background-color: #ccc;
+            margin: 15px 0;
+        }
+
+        .total-score-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .severity-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #888888;
+            margin-bottom: 15px;
+        }
+
+        /* Citation Section */
+        .citation-box {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            background: #fafafa;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #333;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .submit-btn:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Left Panel: Survey Questions -->
+    <div class="survey-panel">
+        <div class="survey-header">
+            <h1>Need for Cognition Scale</h1>
+            <p>Rate each statement from 1 (Very uncharacteristic) to 5 (Very characteristic):</p>
+        </div>
+        <div id="questions-container">
+            <!-- Dynamically populated questions -->
+        </div>
+    </div>
+
+    <!-- Right Panel: Score & Interpretation Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <h2>Score Interpretation</h2>
+            <div id="interpretation-box" class="interpretation-box">Total Score Range 18-90 (18-90):
+
+Higher scores indicate a greater need for cognitive challenges
+
+Lower scores indicate less desire for cognitive challenges
+
+(Score unlocks once all questions are answered)</div>
+
+            <div class="divider"></div>
+
+            <div class="total-score-title">TOTAL SCORE</div>
+            <div id="severity-label" class="severity-label"></div>
+            <div id="score-display" class="score-display">--</div>
+
+            <!-- Citation Space underneath the score -->
+            <div class="citation-box">
+                <strong>Citation:</strong> Cacioppo, J. T., & Petty, R. E. (1982). The need for cognition. <em>Journal of Personality and Social Psychology</em>, 42(1), 116–131. https://doi.org/10.1037/0022-3514.42.1.116
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitSurvey()">score</button>
+    </div>
+</div>
+
+<script>
+    const questionsData = [
+        ["I prefer complex to simple problems.", false],
+        ["I like to have the responsibility of handling a situation that requires a lot of thinking.", false],
+        ["Thinking is not my idea of fun.", true],
+        ["I would rather do something that requires little thought than something that is sure to challenge my thinking abilities.", true],
+        ["I try to anticipate and avoid situations where there is a likely chance I will have to think in depth about something.", true],
+        ["I find satisfaction in deliberating hard and long for hours.", false],
+        ["I only think as hard as I have to.", true],
+        ["I prefer to think about small daily projects as opposed to long term ones.", true],
+        ["The idea of relying on thought to make my way to the top appeals to me.", false],
+        ["I like tasks that require little thought once I have learned them", true],
+        ["I really enjoy a task that involves coming up with new solutions to problems.", false],
+        ["Learning new ways to think doesn't excite me very much", true],
+        ["I prefer my life to be filled with puzzles I must solve", false],
+        ["I would prefer a task that is intellectual, difficult and important to one that is somewhat important but does not require much thought.", false],
+        ["The notion of thinking abstractly in appealing to me", false],
+        ["I feel relief rather than satisfaction after completing a task that requires a lot of mental effort", true],
+        ["It is enough for me that something gets the job done, I don't care care or why it works", true],
+        ["I usually end up deliberating about issues even when they do not affect me personally", false]
+    ];
+
+    const likertOptions = [
+        ["1 - Very uncharacteristic of me", 1],
+        ["2 - Somewhat uncharacteristic of me", 2],
+        ["3 - Uncertain", 3],
+        ["4 - Somewhat characteristic of me", 4],
+        ["5 - Very characteristic of me", 5]
+    ];
+
+    function renderSurvey() {
+        const container = document.getElementById("questions-container");
+        let html = "";
+
+        questionsData.forEach(([qText, isReversed], index) => {
+            const revTag = isReversed ? " (Reverse Scored)" : "";
+            html += `
+                <div class="question-container">
+                    <div class="question-title">${index + 1}. ${qText}${revTag}</div>
+                    <div class="options-group">
+            `;
+
+            likertOptions.forEach(([optText, val]) => {
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="q${index}" value="${val}" onchange="updateScores()">
+                        <span>${val}</span>
+                        <span class="option-italic">(${optText})</span>
+                    </label>
+                `;
+            });
+
+            html += `</div></div>`;
+        });
+
+        container.innerHTML = html;
+        document.getElementById("interpretation-box").innerText = 
+            `Total Score Range 18-90 (18-${questionsData.length * 5}):\n\n` +
+            "Higher scores indicate a\ngreater need for cognitive challenges" +
+            "\n\nLower scores indicate less\ndesire for cognitive challenges\n\n" +
+            "(Score unlocks once all\nquestions are answered)";
+    }
+
+    function updateScores() {
+        let allAnswered = true;
+        let totalPoints = 0;
+
+        questionsData.forEach(([_, isReversed], index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+            } else {
+                let val = parseInt(selected.value);
+                if (isReversed) {
+                    val = 6 - val;
+                }
+                totalPoints += val;
+            }
+        });
+
+        const scoreDisplay = document.getElementById("score-display");
+        if (!allAnswered) {
+            scoreDisplay.innerText = "--";
+            scoreDisplay.style.color = "#888888";
+        } else {
+            scoreDisplay.innerText = totalPoints;
+            scoreDisplay.style.color = "#2e7d32";
+        }
+    }
+
+    function submitSurvey() {
+        let allAnswered = true;
+        questionsData.forEach(([_, __], index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+            }
+        });
+
+        if (!allAnswered) {
+            alert("Please answer all questions before submitting.");
+            return;
+        }
+
+        const finalTotal = document.getElementById("score-display").innerText;
+        alert(`Submitted\nTotal Score: ${finalTotal}`);
+    }
+
+    window.onload = renderSurvey;
+</script>
+
+</body>
+</html>
