@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Assessment - DASS-21</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #e5e5e5;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        /* Left Panel - Survey */
+        .survey-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .survey-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .options-wrapper {
+            display: flex;
+            gap: 15px;
+            padding-left: 15px;
+            flex-wrap: wrap;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .option-label input {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        /* Right Panel - Sidebar */
+        .sidebar {
+            width: 320px;
+            background-color: #f8f9fa;
+            padding: 30px 20px;
+            border-left: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            padding-right: 5px;
+        }
+
+        .sidebar h2 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .score-block {
+            text-align: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .score-block-title {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 2px;
+        }
+
+        .score-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .divider {
+            width: 100%;
+            height: 2px;
+            background-color: #ccc;
+            margin: 15px 0;
+        }
+
+        /* Citation Section */
+        .citation-box {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            background: #fafafa;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 15px;
+            line-height: 1.3;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Left Panel: Survey Questions -->
+    <div class="survey-panel">
+        <div class="survey-header">
+            <h1>DASS-21 ASSESSMENT</h1>
+        </div>
+        <div id="questions-container">
+            <!-- Dynamically populated questions -->
+        </div>
+    </div>
+
+    <!-- Right Panel: Score & Interpretation Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <h2>SUB-SCALE TOTALS</h2>
+
+            <div class="score-block">
+                <div class="score-block-title">Depression (D)</div>
+                <div id="score-D" class="score-display">0</div>
+            </div>
+
+            <div class="score-block">
+                <div class="score-block-title">Anxiety (A)</div>
+                <div id="score-A" class="score-display">0</div>
+            </div>
+
+            <div class="score-block">
+                <div class="score-block-title">Stress (S)</div>
+                <div id="score-S" class="score-display">0</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="score-block">
+                <div class="score-block-title">OVERALL TOTAL</div>
+                <div id="score-Total" class="score-display" style="font-size: 36px; color: #000;">0</div>
+            </div>
+
+            <!-- Citation Space -->
+            <div class="citation-box">
+                <strong>Citation:</strong> Lovibond, S. H., & Lovibond, P. F. (1995). Depression Anxiety Stress Scales (DASS--21, DASS--42). <em>APA PsycTests</em>. https://doi.org/10.1037/t01004-000
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitSurvey()">Submit Assessment</button>
+    </div>
+</div>
+
+<script>
+    const surveyItems = [
+        ["S", "The past week, I found it hard to wind down"],
+        ["A", "The past week, I was aware of dryness of my mouth"],
+        ["D", "The past week, I could not seem to experience any positive feeling at all"],
+        ["A", "The past week, I experienced breathing difficulty (e.g., excessively rapid breathing, breathlessness in the absence of physical exertion)"],
+        ["D", "The past week, I found it difficult to work up the initiative to do things"],
+        ["S", "The past week, I tended to over-react to situations"],
+        ["A", "The past week, I experienced trembling"],
+        ["S", "The past week, I felt that I was using a lot of nervous energy"],
+        ["A", "The past week, I was worried about situations in which I might panic and make a fool of myself"],
+        ["D", "The past week, I felt that I had nothing to look forward to"],
+        ["S", "The past week, I found myself getting agitated"],
+        ["S", "The past week, I found it difficult to relax"],
+        ["D", "The past week, I felt discouraged and dejected"],
+        ["S", "The past week, I was intolerant of anything that kept me from getting on with what I was doing"],
+        ["A", "The past week, I felt I was close to panic"],
+        ["D", "The past week, I was unable to become enthusiastic about anything"],
+        ["D", "The past week, I felt I wasn't worth much as a person"],
+        ["S", "The past week, I feel that I was rather touchy"],
+        ["A", "The past week, I was aware of the action of my heart in the absence of physical exertion"],
+        ["A", "The past week, I felt scared without any good reason"],
+        ["D", "The past week, I felt that life was meaningless"]
+    ];
+
+    const likertOptions = [
+        ["Does not apply to me", 0],
+        ["Applies to me to some degree/some of the time", 1],
+        ["Applies to me a considerable amount", 2],
+        ["Applies to me very much", 3]
+    ];
+
+    function renderSurvey() {
+        const container = document.getElementById("questions-container");
+        let html = "";
+
+        surveyItems.forEach((item, index) => {
+            const [code, qText] = item;
+            html += `
+                <div class="question-container">
+                    <div class="question-title">${index + 1}. ${qText}</div>
+                    <div class="options-wrapper">
+            `;
+            likertOptions.forEach((opt, optIndex) => {
+                const checked = optIndex === 0 ? "checked" : "";
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="q_${index}" data-code="${code}" value="${opt[1]}" ${checked} onchange="updateAllScores()">
+                        ${opt[0]}
+                    </label>
+                `;
+            });
+            html += `</div></div>`;
+        });
+
+        container.innerHTML = html;
+        updateAllScores();
+    }
+
+    function updateAllScores() {
+        let grandTotal = 0;
+        const codes = ["D", "A", "S"];
+
+        codes.forEach(code => {
+            const radios = document.querySelectorAll(`input[data-code="${code}"]:checked`);
+            let rawSubTotal = 0;
+            radios.forEach(r => {
+                rawSubTotal += parseInt(r.value);
+            });
+
+            const scaledSubTotal = rawSubTotal * 2;
+            document.getElementById(`score-${code}`).innerText = scaledSubTotal;
+            grandTotal += scaledSubTotal;
+
+            let severeThreshold = code === "D" ? 21 : (code === "A" ? 15 : 26);
+            let moderateThreshold = code === "D" ? 14 : (code === "A" ? 10 : 19);
+
+            let color = "#2e7d32";
+            if (scaledSubTotal >= severeThreshold) {
+                color = "#d32f2f";
+            } else if (scaledSubTotal >= moderateThreshold) {
+                color = "#ef6c00";
+            }
+            document.getElementById(`score-${code}`).style.color = color;
+        });
+
+        const totalEl = document.getElementById("score-Total");
+        totalEl.innerText = grandTotal;
+        if (grandTotal >= 75) {
+            totalEl.style.color = "#d32f2f";
+        } else if (grandTotal >= 45) {
+            totalEl.style.color = "#ef6c00";
+        } else {
+            totalEl.style.color = "#2e7d32";
+        }
+    }
+
+    function submitSurvey() {
+        const dScore = document.getElementById("score-D").innerText;
+        const aScore = document.getElementById("score-A").innerText;
+        const sScore = document.getElementById("score-S").innerText;
+
+        alert(`Assessment Complete!\n\nDepression (D): ${dScore}\nAnxiety (A): ${aScore}\nStress (S): ${sScore}`);
+    }
+
+    window.onload = renderSurvey;
+</script>
+
+</body>
+</html>
