@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamilton Depression Rating Scale (HAM-D)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #e5e5e5;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        /* Left Panel - Survey */
+        .survey-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .survey-header h1 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .survey-header p {
+            font-size: 13px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 4px 0 4px 15px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* Right Panel - Sidebar */
+        .sidebar {
+            width: 340px;
+            background-color: #f0f0f0;
+            padding: 30px 20px;
+            border-left: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            padding-right: 5px;
+        }
+
+        .sidebar h2 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .interpretation-box {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            background: #fff;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            width: 100%;
+            margin-bottom: 15px;
+            white-space: pre-line;
+        }
+
+        .divider {
+            width: 100%;
+            height: 2px;
+            background-color: #ccc;
+            margin: 15px 0;
+        }
+
+        .total-score-title {
+            font-size: 15px;
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+
+        .severity-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 56px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        /* Citation Section */
+        .citation-box {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            background: #fafafa;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .submit-btn:hover {
+            background-color: #115293;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Left Panel: Survey Questions -->
+    <div class="survey-panel">
+        <div class="survey-header">
+            <h1>Hamilton Depression Rating Scale (HAM-D)</h1>
+            <p>Please select the appropriate rating for each item based on patient evaluation:</p>
+        </div>
+        <div id="questions-container">
+            <!-- Dynamically populated questions -->
+        </div>
+    </div>
+
+    <!-- Right Panel: Score & Interpretation Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <h2>Interpretation</h2>
+            <div class="interpretation-box">0-7: Normal / Remission
+8-13: Mild Depression
+14-18: Moderate Depression
+19-22: Severe Depression
+≥ 23: Very Severe Depression</div>
+
+            <div class="divider"></div>
+
+            <div class="total-score-title">TOTAL SCORE</div>
+            <div id="severity-label" class="severity-label">Normal / Remission</div>
+            <div id="score-display" class="score-display">0</div>
+
+            <!-- Citation Space underneath the score -->
+            <div class="citation-box">
+                <strong>Citation:</strong> HAMILTON M. (1960). A rating scale for depression. <em>Journal of neurology, neurosurgery, and psychiatry</em>, 23(1), 56–62. https://doi.org/10.1136/jnnp.23.1.56
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitSurvey()">score</button>
+    </div>
+</div>
+
+<script>
+    const questionsData = [
+        [
+            "Depressed Mood\n(sadness, hopeless, helpless, worthless)",
+            [
+                ["Absent.", 0],
+                ["These feelings were indicated only on questioning.", 1],
+                ["These feeling states spontaneously reported verbally.", 2],
+                ["Communicates feeling states non-verbally, i.e., through facial expression, posture, voice, and tendency to weep.", 3],
+                ["Patient reports virtually only these feeling states in their spontaneous verbal and non-verbal communication.", 4]
+            ]
+        ],
+        [
+            "Guilt",
+            [
+                ["Absent.", 0],
+                ["Self-reproach, feels he/she has let people down.", 1],
+                ["Ideas of guilt or rumination over past errors or sinful deeds.", 2],
+                ["Present illness is a punishment. Delusions of guilt.", 3],
+                ["Hears accusatory or denunciatory voices and/or experiences threatening visual hallucinations.", 4]
+            ]
+        ],
+        [
+            "Suicide",
+            [
+                ["Absent.", 0],
+                ["Feels life is not worth living.", 1],
+                ["Wishes he/she were dead or any thoughts of possible death to self.", 2],
+                ["Ideas or gestures of suicide.", 3],
+                ["Attempts at suicide (any serious attempt rate 4).", 4]
+            ]
+        ],
+        [
+            "Insomnia: Early Night",
+            [
+                ["No difficulty falling asleep.", 0],
+                ["Complains of occasional difficulty falling asleep, i.e., more than 1/2 hour.", 1],
+                ["Complains of nightly difficulty falling asleep.", 2]
+            ]
+        ],
+        [
+            "Insomnia: Middle of the Night",
+            [
+                ["No difficulty.", 0],
+                ["Patient complains of being restless and disturbed during the night.", 1],
+                ["Waking during the night – any getting out of bed rates 2 (except for purposes of voiding).", 2]
+            ]
+        ],
+        [
+            "Insomnia: Morning",
+            [
+                ["No difficulty.", 0],
+                ["Waking in early hours of the morning but goes back to sleep.", 1],
+                ["Unable to fall asleep again if he/she gets out of bed.", 2]
+            ]
+        ],
+        [
+            "Work and Activities",
+            [
+                ["No difficulty.", 0],
+                ["Thoughts and feelings of incapacity, fatigue, or weakness related to activities, work, or hobbies.", 1],
+                ["Loss of interest in activity, hobbies, or work – either directly reported or indirect in listlessness, indecision, and vacillation.", 2],
+                ["Decrease in actual time spent in activities or productivity (does not spend at least 3 hours a day in jobs/hobbies excluding chores).", 3],
+                ["Stopped working because of present illness, or fails to perform routine chores unassisted.", 4]
+            ]
+        ],
+        [
+            "Motor Retardation\n(slowness of thought and speech, impaired ability to concentrate, decreased motor activity)",
+            [
+                ["Normal speech and thought.", 0],
+                ["Slight retardation during the interview.", 1],
+                ["Obvious retardation during the interview.", 2],
+                ["Interview difficult.", 3],
+                ["Complete stupor.", 4]
+            ]
+        ],
+        [
+            "Agitation",
+            [
+                ["None.", 0],
+                ["Fidgetiness.", 1],
+                ["Playing with hands, hair, etc.", 2],
+                ["Moving about, can’t sit still.", 3],
+                ["Hand wringing, nail biting, hair-pulling, biting of lips.", 4]
+            ]
+        ],
+        [
+            "Anxiety Psychological",
+            [
+                ["No difficulty.", 0],
+                ["Subjective tension and irritability.", 1],
+                ["Worrying about minor matters.", 2],
+                ["Apprehensive attitude apparent in face or speech.", 3],
+                ["Fears expressed without questioning.", 4]
+            ]
+        ],
+        [
+            "Anxiety Somatic",
+            [
+                ["Absent.", 0],
+                ["Mild.", 1],
+                ["Moderate.", 2],
+                ["Severe.", 3],
+                ["Incapacitating.", 4]
+            ]
+        ],
+        [
+            "Gastro-Intestinal",
+            [
+                ["None.", 0],
+                ["Loss of appetite but eating without staff encouragement. Heavy feelings in abdomen.", 1],
+                ["Difficulty eating without staff urging. Requests or requires laxatives or medication for bowels/GI symptoms.", 2]
+            ]
+        ],
+        [
+            "General Somatic Symptoms",
+            [
+                ["None.", 0],
+                ["Heaviness in limbs, back, or head. Backaches, headaches, muscle aches. Loss of energy and fatigability.", 1],
+                ["Any clear-cut symptom.", 2]
+            ]
+        ],
+        [
+            "Genital Symptoms\n(Libido and menstrual disturbances)",
+            [
+                ["Absent.", 0],
+                ["Mild.", 1],
+                ["Severe.", 2]
+            ]
+        ],
+        [
+            "Hypochondriasis",
+            [
+                ["Not present.", 0],
+                ["Self-absorption (bodily).", 1],
+                ["Preoccupation with health.", 2],
+                ["Frequent complaints, requests for help, etc.", 3],
+                ["Hypochondriacal delusions.", 4]
+            ]
+        ],
+        [
+            "Weight Loss",
+            [
+                ["No weight loss./Less than 1 lb weight loss", 0],
+                ["Probable weight loss according to patient./Greater than 1 lb weight loss", 1],
+                ["Definite weight loss according to patient./Greater than 2 lb weight loss", 2],
+                ["Not assessed.", 3]
+            ]
+        ],
+        [
+            "Insight",
+            [
+                ["Acknowledges being depressed and ill.", 0],
+                ["Acknowledges illness but attributes cause to bad food, climate, overwork, virus, need for rest, etc.", 1],
+                ["Denies being ill at all.", 2]
+            ]
+        ]
+    ];
+
+    function renderSurvey() {
+        const container = document.getElementById("questions-container");
+        let html = "";
+
+        questionsData.forEach((q, index) => {
+            const [qText, options] = q;
+            html += `
+                <div class="question-container">
+                    <div class="question-title">${index + 1}. ${qText.replace(/\n/g, '<br>')}</div>
+            `;
+            options.forEach(opt => {
+                const checked = opt[1] === 0 ? "checked" : "";
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="q${index}" value="${opt[1]}" ${checked} onchange="updateTotalScore()">
+                        ${opt[0]}
+                    </label>
+                `;
+            });
+            html += `</div>`;
+        });
+
+        container.innerHTML = html;
+        updateTotalScore();
+    }
+
+    function updateTotalScore() {
+        let score = 0;
+        questionsData.forEach((_, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (selected) {
+                score += parseInt(selected.value);
+            }
+        });
+
+        document.getElementById("score-display").innerText = score;
+
+        let color = "#2e7d32";
+        let text = "Normal / Remission";
+
+        if (score >= 23) {
+            color = "#b71c1c";
+            text = "Very Severe Depression";
+        } else if (score >= 19) {
+            color = "#d32f2f";
+            text = "Severe Depression";
+        } else if (score >= 14) {
+            color = "#ef6c00";
+            text = "Moderate Depression";
+        } else if (score >= 8) {
+            color = "#f57c00";
+            text = "Mild Depression";
+        }
+
+        const scoreDisplay = document.getElementById("score-display");
+        const severityLabel = document.getElementById("severity-label");
+
+        scoreDisplay.style.color = color;
+        severityLabel.style.color = color;
+        severityLabel.innerText = text;
+    }
+
+    function submitSurvey() {
+        const finalScore = document.getElementById("score-display").innerText;
+        const status = document.getElementById("severity-label").innerText;
+        alert(`Assessment Complete\nHAM-D Score: ${finalScore}\nClassification: ${status}`);
+    }
+
+    window.onload = renderSurvey;
+</script>
+
+</body>
+</html>
