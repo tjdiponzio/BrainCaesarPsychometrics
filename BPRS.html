@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brief Psychiatric Rating Scale (BPRS)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #e5e5e5;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        /* Left Panel - Survey */
+        .survey-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .survey-header h1 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .question-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            white-space: pre-line;
+        }
+
+        .options-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-left: 5px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .option-label input {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        /* Right Panel - Sidebar */
+        .sidebar {
+            width: 300px;
+            background-color: #f8f9fa;
+            padding: 30px 20px;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            padding-right: 5px;
+        }
+
+        .sidebar h2 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #dee2e6;
+            margin: 15px 0;
+        }
+
+        .total-score-title {
+            font-size: 13px;
+            font-weight: normal;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .severity-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 40px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Citation Section */
+        .citation-box {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            background: #fff;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Left Panel: Survey Questions -->
+    <div class="survey-panel">
+        <div class="survey-header">
+            <h1>BRIEF PSYCHIATRIC RATING SCALE (BPRS)</h1>
+        </div>
+        <div id="questions-container">
+            <!-- Dynamically populated questions -->
+        </div>
+    </div>
+
+    <!-- Right Panel: Score & Interpretation Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <h2>Score Interpretation</h2>
+            <div class="divider"></div>
+
+            <div class="total-score-title">BPRS TOTAL</div>
+            <div id="score-display" class="score-display">0</div>
+            <div id="severity-label" class="severity-label">Sub Clinical</div>
+
+            <!-- Citation Space underneath the score -->
+            <div class="citation-box">
+                <strong>Citation:</strong> Overall, J. E., & Gorham, D. R. (1962). Brief Psychiatric Rating Scale (BPRS) [Database record]. <em>APA PsycTests</em>.
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitSurvey()">Submit</button>
+    </div>
+</div>
+
+<script>
+    const questionsText = [
+        "1. Somatic Concern:\nRate their physical health a concern to them. Realistic or not.",
+        "2. Anxiety:\nRate their anxiety from what they describe verbally. Only Verbally.",
+        "3. Emotional Withdrawal:\nRate the degree they fail to be in emotional contact with others.",
+        "4. Conceptional Disorganization:\nRate how confused, disconnected and/or disorganized their thoughts are.",
+        "5. Guilt:\nRate their concern or remorse for past actions. Based on THEIR subjective experiences.",
+        "6. Tension:\nRate their physical nervousness and activity level. Based on what you obverse.",
+        "7. Mannerisms and Posture:\nRate how odd or unnatural their motor movements are, in comparison to a group of asymptomatic people.",
+        "8. Grandiosity:\nRate how exaggerated their opinion of themselves and their beliefs in extraordinary abilities or powers.",
+        "9. Depressed Mood:\nRate their sadness only in regard to their emotional state/despondency.",
+        "10. Hostility:\nRate their contempt, belligerence and anger towards people outside of the interview.",
+        "11. Suspiciousness:\nRate the history of malicious and discriminatory actions their experiences. Delusional or not",
+        "12. Hallucinations:\nRate their perceptions without appropriate stimulus in the week last.",
+        "13. Motor Retardation:\nRate the reduction in energy and how slow their movement is.",
+        "14. Uncooperativeness:\nRate how uncooperative they were with you during the interview.",
+        "15. Unusual Thought Content:\nRate how odd/strange/bizarre their thought content is.",
+        "16. Blunted Affect:\nRate their reduced emotional tone or emotional involvement.",
+        "17. Excitement:\nRate their heightened emotional tone/irateness/reactivity.",
+        "18. Disorientation:\nRate how confused they are in regards to place and time."
+    ];
+
+    const likertOptions = [
+        ["Not Assessed", 0],
+        ["Not present", 1],
+        ["Very Mild", 2],
+        ["Mild", 3],
+        ["Moderate", 4],
+        ["Moderate Severe", 5],
+        ["Severe", 6],
+        ["Extremely Severe", 7]
+    ];
+
+    function renderSurvey() {
+        const container = document.getElementById("questions-container");
+        let html = "";
+
+        questionsText.forEach((qText, index) => {
+            html += `
+                <div class="question-container">
+                    <div class="question-title">${qText}</div>
+                    <div class="options-group">
+            `;
+
+            likertOptions.forEach(([optText, points]) => {
+                const checked = (points === 0) ? "checked" : "";
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="q${index}" value="${points}" ${checked} onchange="updateScores()">
+                        <span>${optText}</span>
+                    </label>
+                `;
+            });
+
+            html += `</div></div>`;
+        });
+
+        container.innerHTML = html;
+        updateScores();
+    }
+
+    function updateScores() {
+        let totalScore = 0;
+
+        questionsText.forEach((_, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (selected) {
+                totalScore += parseInt(selected.value);
+            }
+        });
+
+        const scoreDisplay = document.getElementById("score-display");
+        const severityLabel = document.getElementById("severity-label");
+
+        scoreDisplay.innerText = totalScore;
+
+        let color = "#2e7d32";
+        let text = "Sub Clinical";
+
+        if (totalScore >= 53) {
+            color = "#ff0000";
+            text = "Markedly Ill";
+        } else if (totalScore >= 41) {
+            color = "#ff6e00";
+            text = "Moderately Ill";
+        } else if (totalScore >= 30) {
+            color = "#ff6e00";
+            text = "Mildly Ill";
+        }
+
+        scoreDisplay.style.color = color;
+        severityLabel.style.color = color;
+        severityLabel.innerText = text;
+    }
+
+    function submitSurvey() {
+        let allAnswered = true;
+        questionsText.forEach((_, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+            }
+        });
+
+        if (!allAnswered) {
+            alert("Please answer all questions before submitting.");
+            return;
+        }
+
+        const finalScore = document.getElementById("score-display").innerText;
+        alert(`BPRS Complete\nYour final score is: ${finalScore}`);
+    }
+
+    window.onload = renderSurvey;
+</script>
+
+</body>
+</html>
