@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITQ Assessment Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #e5e5e5;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        /* Left Panel - Survey */
+        .survey-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .survey-header h1 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-title {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .options-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-left: 5px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .option-label input {
+            margin-right: 4px;
+            cursor: pointer;
+        }
+
+        /* Right Panel - Sidebar */
+        .sidebar {
+            width: 320px;
+            background-color: #f8f9fa;
+            padding: 30px 20px;
+            border-left: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            padding-right: 5px;
+        }
+
+        .sidebar h2 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .score-box-title {
+            font-size: 11px;
+            font-weight: normal;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .divider {
+            width: 100%;
+            height: 2px;
+            background-color: #333;
+            margin: 10px 0;
+        }
+
+        .total-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+
+        .total-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #000;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* Citation Section */
+        .citation-box {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            background: #fff;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Left Panel: Survey Questions -->
+    <div class="survey-panel">
+        <div class="survey-header">
+            <h1>International Trauma Questionnaire (ITQ)</h1>
+        </div>
+        <div id="questions-container">
+            <!-- Dynamically populated questions -->
+        </div>
+    </div>
+
+    <!-- Right Panel: Score & Interpretation Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <h2>DIMENSIONAL SCORES</h2>
+
+            <div class="score-box-title">PTSD Severity Score</div>
+            <div id="ptsd-score" class="score-display">0</div>
+
+            <div class="score-box-title">CPTSD Severity Score</div>
+            <div id="cptsd-score" class="score-display">0</div>
+
+            <div class="divider"></div>
+
+            <div class="total-title">OVERALL SCORE</div>
+            <div id="total-score" class="total-display">0</div>
+
+            <!-- Citation Space underneath the scores -->
+            <div class="citation-box">
+                <strong>Citation:</strong> Cloitre, M., Shevlin, M., Brewin, C. R., Bisson, J. I., Roberts, N. P., Maercker, A., Karatzias, T., & Hyland, P. (2018). International Trauma Questionnaire (ITQ) [Database record]. <em>APA PsycTests</em>. https://doi.org/10.1037/t73478-000
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="submitSurvey()">Submit Assessment</button>
+    </div>
+</div>
+
+<script>
+    const surveyItems = [
+        ["P", "Over the Last Month have you had upsetting dreams that replay part of the experience or are clearly related to the experience?"],
+        ["P", "Over the Last Month have you had powerful images or memories that sometimes come into your mind in which you feel the experience is happening again in the here and now?"],
+        ["P", "Over the Last Month have you been avoiding internal reminders of the experience (for example, thoughts, feelings, or physical sensations)?"],
+        ["P", "Over the Last Month have you been avoiding external reminders of the experience (for example, people, places, conversations, objects, activities, or situations)?"],
+        ["P", "Over the Last Month have you felt “super-alert”, watchful, or on guard?"],
+        ["P", "Over the Last Month have you felt jumpy or easily startled?"],
+        ["P", "Affected your relationships or social life?"],
+        ["P", "Affected your work or ability to work?"],
+        ["P", "Affected any other important part of your life such as parenting, or school or college work, or other important activities?"],
+
+        ["C", "Do you typically feel that when you are upset, it takes you a long time to calm down."],
+        ["C", "Do you typically feel feel numb or emotionally shut down."],
+        ["C", "Do you typically feel feel like a failure."],
+        ["C", "Do you typically feel feel worthless."],
+        ["C", "Do you typically feel feel distant or cut off from people."],
+        ["C", "Do you typically feel find it hard to stay emotionally close to people."],
+        ["C", "Have the above created problems or concern or distress about your relationships or social life?"],
+        ["C", "Have the above created problems that affected your work or ability to work?"],
+        ["C", "Have the above created problems affected any other important parts of your life such as parenting, or school or college work, or other important activities?"]
+    ];
+
+    const likertOptions = [
+        ["Not at all", 0],
+        ["A little", 1],
+        ["Moderately", 2],
+        ["Quite a bit", 3],
+        ["Extremely", 4]
+    ];
+
+    function renderSurvey() {
+        const container = document.getElementById("questions-container");
+        let html = "";
+
+        surveyItems.forEach(([code, qText], index) => {
+            html += `
+                <div class="question-container">
+                    <div class="question-title">${qText}</div>
+                    <div class="options-group">
+            `;
+
+            likertOptions.forEach(([optText, points]) => {
+                const checked = (points === 0) ? "checked" : "";
+                html += `
+                    <label class="option-label">
+                        <input type="radio" name="q${index}" value="${points}" data-code="${code}" ${checked} onchange="updateScores()">
+                        <span>${optText}</span>
+                    </label>
+                `;
+            });
+
+            html += `</div></div>`;
+        });
+
+        container.innerHTML = html;
+        updateScores();
+    }
+
+    function updateScores() {
+        const pVals = [];
+        const cVals = [];
+
+        surveyItems.forEach(([code], index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const val = selected ? parseInt(selected.value) : 0;
+            if (code === "P") pVals.push(val);
+            if (code === "C") cVals.push(val);
+        });
+
+        // PTSD subclusters
+        const reScore = pVals[0] + pVals[1];
+        const avScore = pVals[2] + pVals[3];
+        const thScore = pVals[4] + pVals[5];
+        const ptsdTotalDim = reScore + avScore + thScore;
+
+        // DSO subclusters
+        const adScore = cVals[0] + cVals[1];
+        const nscScore = cVals[2] + cVals[3];
+        const drScore = cVals[4] + cVals[5];
+        const dsoTotalDim = adScore + nscScore + drScore;
+
+        const grandTotal = ptsdTotalDim + dsoTotalDim;
+
+        document.getElementById("ptsd-score").innerText = ptsdTotalDim;
+        document.getElementById("cptsd-score").innerText = dsoTotalDim;
+        document.getElementById("total-score").innerText = grandTotal;
+    }
+
+    function checkDiagnosis() {
+        const pVals = [];
+        const cVals = [];
+
+        surveyItems.forEach(([code], index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const val = selected ? parseInt(selected.value) : 0;
+            if (code === "P") pVals.push(val);
+            if (code === "C") cVals.push(val);
+        });
+
+        const reDx = (pVals[0] >= 2 || pVals[1] >= 2);
+        const avDx = (pVals[2] >= 2 || pVals[3] >= 2);
+        const thDx = (pVals[4] >= 2 || pVals[5] >= 2);
+        const ptsdFi = (pVals[6] >= 2 || pVals[7] >= 2 || pVals[8] >= 2);
+        const ptsdMet = reDx && avDx && thDx && ptsdFi;
+
+        const adDx = (cVals[0] >= 2 || cVals[1] >= 2);
+        const nscDx = (cVals[2] >= 2 || cVals[3] >= 2);
+        const drDx = (cVals[4] >= 2 || cVals[5] >= 2);
+        const dsoFi = (cVals[6] >= 2 || cVals[7] >= 2 || cVals[8] >= 2);
+        const dsoMet = adDx && nscDx && drDx && dsoFi;
+
+        if (ptsdMet && dsoMet) {
+            return "Complex PTSD (CPTSD)";
+        } else if (ptsdMet && !dsoMet) {
+            return "PTSD";
+        } else {
+            return "No Diagnosis (Criteria not met)";
+        }
+    }
+
+    function submitSurvey() {
+        const ptsdScore = document.getElementById("ptsd-score").innerText;
+        const cptsdScore = document.getElementById("cptsd-score").innerText;
+        const diagnosis = checkDiagnosis();
+
+        alert(`Assessment Complete!\n\n--- Dimensional Scores ---\nPTSD Symptom Score: ${ptsdScore}\nCPTSD Symptom Score: ${cptsdScore}\n\n--- Criteria Met for Further Evaluation ---\n${diagnosis}`);
+    }
+
+    window.onload = renderSurvey;
+</script>
+
+</body>
+</html>
