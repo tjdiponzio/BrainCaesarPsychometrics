@@ -179,9 +179,9 @@
     <div class="sidebar">
         <div class="sidebar-top">
             <h2>Score Interpretation</h2>
-            <div class="interpretation-box">• Yes to 1 or 2: Mild Risk
+            <div class="interpretation-box">• Yes to 1 or 2: Low Risk
 • Yes to 3 or 6: Moderate Risk
-• Yes to 4, 5, or 7: HIGH RISK
+• Yes to 4, 5, or 7: High Risk
 
 Safety Plan:
 - Ask Warning Signs
@@ -282,7 +282,7 @@ Safety Plan:
 
         const highRisk = ans[3] === 1 || ans[4] === 1 || ans[6] === 1;
         const moderateRisk = ans[2] === 1 || ans[5] ===1;
-        const mildRisk = ans[0] === 1 || ans[1] === 1;
+        const LowRisk = ans[0] === 1 || ans[1] === 1;
 
         if (highRisk) {
             color = "#d32f2f";
@@ -290,9 +290,9 @@ Safety Plan:
         } else if (moderateRisk) {
             color = "#ef6c00";
             level = "MODERATE";
-        } else if (mildRisk) {
+        } else if (LowRisk) {
             color = "#f9a825";
-            level = "MILD RISK";
+            level = "LOW RISK";
         }
 
         const scoreDisplay = document.getElementById("score-display");
